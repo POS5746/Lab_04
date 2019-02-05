@@ -41,7 +41,7 @@ Y <- as.matrix(df$lbwght)
 X <- as.matrix(cbind(1, df$lfaminc, df$fatheduc, df$motheduc, df$cigs, df$cigtax, df$male, df$white))
 ```
 
-Notice that we have to include a column of ones which will allow us to estimate our intercept. If we don't have this column, we can't estimate the model since we will have incompatible matrices.
+Notice that we have to include a column of ones which will allow us to estimate our intercept.
 
 We can now solve our model:
 ```{r echo=TRUE, message=FALSE}

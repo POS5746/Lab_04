@@ -173,7 +173,7 @@ summary(fit0)</code></pre>
 <p>To estimate this equation in R, we first build our matrices.</p>
 <pre class="r"><code>Y &lt;- as.matrix(df$lbwght)
 X &lt;- as.matrix(cbind(1, df$lfaminc, df$fatheduc, df$motheduc, df$cigs, df$cigtax, df$male, df$white))</code></pre>
-<p>Notice that we have to include a column of ones which will allow us to estimate our intercept. If we don’t have this column, we can’t estimate the model since we will have incompatible matrices.</p>
+<p>Notice that we have to include a column of ones which will allow us to estimate our intercept.</p>
 <p>We can now solve our model:</p>
 <pre class="r"><code>betas &lt;- solve(t(X) %*% X) %*% t(X) %*% Y
 yhat1 &lt;- X %*% betas
