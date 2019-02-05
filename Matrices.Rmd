@@ -1,0 +1,70 @@
+---
+title: "Linear Algebra With R"
+author: "Juan Ramirez"
+date: "2/5/2019"
+output: html_document
+---
+
+##Linear Algebra in R
+We will often find it useful to work with matrices in R, especially when coding our own functions for analysis. Luckily, R makes it extremely easy to work with matrices and we will estimate a simple OLS model today using matrix algebra. 
+
+We first load in a dataset of interest. For this class we will be using the birth weight dataset referenced in the Wooldridge textbook. There is a package in R, `wooldridge` that allows access to all the datasets referenced throughout the textbook.
+```{r echo=TRUE, message=FALSE}
+library(wooldridge)
+
+data("bwght")
+```
+
+When looking over our dataset, we notice that there are missing values for some of the variables. Let's proceed to delete any such observations. We create a new dataset called `df`. 
+```{r echo=TRUE, message=FALSE}
+df <- na.omit(bwght)
+```
+
+We are interested in exploring the effects of different individual, family, and county level variables on a child's weight at birth. Specifically, we are interested in determining the effect that a mother's cigarette smoking while pregnant has on her child. To estimate this model, we also include relevant controls such as family income (in logs), the education level of both parents, gender of the newborn, race of newborn, and the tax rate on cigarette sales (if any). Our variable of interest, `cigs` measures the number of cigarettes the mother smoked per day while pregnant. Let's estimate the model, and generate fitted values:
+
+```{r echo=TRUE, message=FALSE}
+fit0 <- lm(lbwght ~ lfaminc + fatheduc + motheduc + cigs + cigtax + male + white, data = df)
+yhat0 <- predict(fit0)
+res0 <- residuals(fit0)
+summary(fit0)
+```
+
+Now that we have these results, we can estimate our model using linear algebra. The least squares solution for our slope coefficients, in matrix form, is $b = (X'X)^{-1}X'Y$. The general form of our regression model using matrix algebra is
+
+$$\hat{Y} = Xb = X(X'X)^{-1}X'Y$$ 
+
+and our residuals are calculated as $e=Y-\hat{Y}=(I-H)Y$ where $H=X(X'X)^{-1}X'$.
+
+To estimate this equation in R, we first build our matrices. 
+```{r echo=TRUE, message=FALSE}
+Y <- as.matrix(df$lbwght)
+X <- as.matrix(cbind(1, df$lfaminc, df$fatheduc, df$motheduc, df$cigs, df$cigtax, df$male, df$white))
+```
+
+Notice that we have to include a column of ones which will allow us to estimate our intercept. If we don't have this column, we can't estimate the model since we will have incompatible matrices.
+
+We can now solve our model:
+```{r echo=TRUE, message=FALSE}
+betas <- solve(t(X) %*% X) %*% t(X) %*% Y
+yhat1 <- X %*% betas
+res1 <- Y - yhat1
+```
+
+If you compare the coefficient vector $b$ with the results from the OLS regression, you will see that they are identical. Similarly, fitted values and residual values are identical across both estimation procedures. 
+```{r echo=TRUE, message=FALSE}
+fitted <- as.matrix(cbind(yhat0, yhat1))
+
+coefficients <- as.matrix(cbind(fit0$coefficients, betas))
+
+resid <- as.matrix(cbind(res0, res1))
+
+head(fitted)
+head(coefficients)
+head(resid)
+```
+
+
+
+
+
+
